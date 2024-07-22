@@ -1,0 +1,25 @@
+set cut_paste_input [stack 0]
+version 14.0 v5
+push $cut_paste_input
+NoOp {
+ name Doppelgänger
+ tile_color 0x1f5473ff
+ label "\n\n<i>\[knob Name]\n\n"
+ note_font "DejaVu Sans Bold Italic"
+ note_font_color 0xc3ffffff
+ selected true
+ xpos -507
+ ypos 1556
+ hide_input true
+ addUserKnob {20 TG l -}
+ addUserKnob {26 txt l "" +STARTLINE T "<b><font size=\"40\"><font color=\"light blue\">DOPPELGANGER</font></b>"}
+ addUserKnob {26 ""}
+ addUserKnob {4 Name l > M {}}
+ addUserKnob {22 Refresh l "<font color=\"lightblue\">Refresh" t "Refresh the List of nodes to look for" T "for i in nuke.allNodes():\n    i.setSelected(False)\n    if i.knob('c8aB5Azx3') != None:\n        i.setSelected(True)\n\nnames = \[]\nfor s in nuke.selectedNodes():\n    n = s\['name'].value()\n    names.append(n)\n    \n\n\n\n\nnuke.thisNode()\['Name'].setValues(names)" +STARTLINE}
+ addUserKnob {22 Connect l "<font color=\"lightblue\">Connect" -STARTLINE T "THIS = nuke.thisNode()\nPARENT = THIS\['Name'].toScript()\nE = nuke.exists(PARENT)\n\nif E == True:\n    v = nuke.toNode(PARENT)\n    THIS.setInput(0,v)\n    firstInput = THIS.input(0) \n    colour = firstInput\['tile_color'].getValue()\n    if firstInput is not None:\n        THIS\['tile_color'].setValue(int(colour)) \n    else: \n        pass\n    \nelse:\n    pass\n    nuke.message('There is no node named that in this script!')\n    \n\nnukescripts.clear_selection_recursive() \n\n\n"}
+ addUserKnob {26 ""}
+ addUserKnob {22 Find l "<font color=\"lightblue\">Find Connected" t "This will show you the node Doppelganger is connected to" -STARTLINE T "THIS = nuke.thisNode()\nPARENT = THIS.knob('Name').toScript()\nE = nuke.exists(PARENT)\n\nif E == True:\n    v = nuke.toNode(PARENT)\n    nuke.zoom( 2, \[ v.xpos(), v.ypos() ])\nelse:\n    pass\n    nuke.message('Cannot find that node')\n    \n\nnukescripts.clear_selection_recursive() \n\n"}
+ addUserKnob {22 ConnectAll l "<font color=\"lightblue\">Connect all Doppelgangers" t "This will connect all Doppelgangers in your script. Handy if you have pasted a large script" -STARTLINE T "for s in nuke.allNodes():\n    classTypes = \['NoOp']\n    for n in classTypes:\n        if n in s.Class():\n            try:\n                s\['Connect'].execute()\n            except:\n                pass"}
+ addUserKnob {26 ""}
+ addUserKnob {26 DateUpdated l "" +STARTLINE T "<div style=\"text-align: left; font-size: 10px; color: #666666; font-style: italic;\">\n  v 1.1 : 2018\n</div>"}
+}
