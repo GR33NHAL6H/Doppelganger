@@ -1,4 +1,4 @@
-# Doppelganger
+# Doppelganger - 2018
 
 Doppelganger is a lightweight node that automatically finds and connects to the node of your choice. This can be anything from a read node to a camera or lens distortion node. It saves you having to copy and paste the same node over and over causing scripts to increase in size and increasing user error when manually updating versions. 
 
