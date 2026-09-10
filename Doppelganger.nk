@@ -1,25 +1,51 @@
 set cut_paste_input [stack 0]
-version 14.0 v5
+version 15.0 v5
 push $cut_paste_input
 NoOp {
- name Doppelgänger
- tile_color 0x1f5473ff
- label "\n\n<i>\[knob Name]\n\n"
- note_font "DejaVu Sans Bold Italic"
- note_font_color 0xc3ffffff
- selected true
- xpos -507
- ypos 1556
- hide_input true
- addUserKnob {20 TG l -}
- addUserKnob {26 txt l "" +STARTLINE T "<b><font size=\"40\"><font color=\"light blue\">DOPPELGANGER</font></b>"}
- addUserKnob {26 ""}
- addUserKnob {4 Name l > M {}}
- addUserKnob {22 Refresh l "<font color=\"lightblue\">Refresh" t "Refresh the List of nodes to look for" T "for i in nuke.allNodes():\n    i.setSelected(False)\n    if i.knob('c8aB5Azx3') != None:\n        i.setSelected(True)\n\nnames = \[]\nfor s in nuke.selectedNodes():\n    n = s\['name'].value()\n    names.append(n)\n    \n\n\n\n\nnuke.thisNode()\['Name'].setValues(names)" +STARTLINE}
- addUserKnob {22 Connect l "<font color=\"lightblue\">Connect" -STARTLINE T "THIS = nuke.thisNode()\nPARENT = THIS\['Name'].toScript()\nE = nuke.exists(PARENT)\n\nif E == True:\n    v = nuke.toNode(PARENT)\n    THIS.setInput(0,v)\n    firstInput = THIS.input(0) \n    colour = firstInput\['tile_color'].getValue()\n    if firstInput is not None:\n        THIS\['tile_color'].setValue(int(colour)) \n    else: \n        pass\n    \nelse:\n    pass\n    nuke.message('There is no node named that in this script!')\n    \n\nnukescripts.clear_selection_recursive() \n\n\n"}
- addUserKnob {26 ""}
- addUserKnob {22 Find l "<font color=\"lightblue\">Find Connected" t "This will show you the node Doppelganger is connected to" -STARTLINE T "THIS = nuke.thisNode()\nPARENT = THIS.knob('Name').toScript()\nE = nuke.exists(PARENT)\n\nif E == True:\n    v = nuke.toNode(PARENT)\n    nuke.zoom( 2, \[ v.xpos(), v.ypos() ])\nelse:\n    pass\n    nuke.message('Cannot find that node')\n    \n\nnukescripts.clear_selection_recursive() \n\n"}
- addUserKnob {22 ConnectAll l "<font color=\"lightblue\">Connect all Doppelgangers" t "This will connect all Doppelgangers in your script. Handy if you have pasted a large script" -STARTLINE T "for s in nuke.allNodes():\n    classTypes = \['NoOp']\n    for n in classTypes:\n        if n in s.Class():\n            try:\n                s\['Connect'].execute()\n            except:\n                pass"}
- addUserKnob {26 ""}
- addUserKnob {26 DateUpdated l "" +STARTLINE T "<div style=\"text-align: left; font-size: 10px; color: #666666; font-style: italic;\">\n  v 1.1 : 2018\n</div>"}
+name Doppelganger
+knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\n\n# List of triggers to ensure the UI stays snappy\nif k.name() in \['inputChange', 'Name', 'showPanel', 'selected']:\n    target_name = n\['Name'].value().strip()\n    target_node = nuke.toNode(target_name)\n    current_input = n.input(0)\n\n    # 1. Check if anything is connected at all\n    if current_input is None:\n        n\['tile_color'].setValue(0x222222ff) # Dark Grey\n        n\['label'].setValue('<font color=\"red\"><b>NOT CONNECTED</b></font>')\n    \n    # 2. Check if the connection matches the 'Name' knob\n    elif target_node and current_input == target_node:\n        # SUCCESS: Correct node is connected\n        t_color = int(target_node\['tile_color'].value())\n        # Use target color, or a \"Safe Green\" if target is default (0)\n        n\['tile_color'].setValue(t_color if t_color != 0 else 0x4b7f40ff)\n        n\['label'].setValue(\"Linked: \" + target_name)\n        \n    else:\n        # 3. WRONG NODE: Connected to something, but not the target\n        n\['tile_color'].setValue(0xf7941dff) # Orange Warning\n        actual_name = current_input.name()\n        n\['label'].setValue(f'<font color=\"orange\"><b>WRONG NODE: \{actual_name\}</b></font>')\n"
+tile_color 0x222222ff
+label "<font color=\"red\"><b>NOT CONNECTED</b></font>"
+note_font "DejaVu Sans Bold Italic"
+note_font_color 0xc3ffffff
+selected true
+xpos 4663
+ypos 914
+hide_input true
+addUserKnob {20 TG l -}
+addUserKnob {26 txt l "" +STARTLINE T "<b><font size=\"40\"><font color=\"light blue\">DOPPELGANGER</font></b>"}
+addUserKnob {26 ""}
+addUserKnob {4 Name l "" +STARTLINE M {BOKEH CAMERA DEPTH DISTORT MATTE_bg1 MATTE_bg2 MATTE_bg3 MATTE_fg1 MATTE_fg2 MATTE_fg3 MATTE_mg1 MATTE_mg2 MATTE_mg3 PAINT PLATE UNDISTORT}}
+Name PLATE
+addUserKnob {22 Refresh l "<font color=\"lightblue\">Refresh" t "Refresh the List of nodes to look for" T "import nuke\n\n# 1. Direct list comprehension (cleaner and faster)\n# This finds all nodes that have the specific knob 'c8aB5Azx3'\nnames_list = \[n.name() for n in nuke.allNodes() if n.knob('c8aB5Azx3')]\nnames_list.sort()\n\n# 2. Reference the current node and knob\nthis_node = nuke.thisNode()\nname_knob = this_node.knob('Name')\n\n# 3. Apply the list to the dropdown\nif name_knob:\n    name_knob.setValues(names_list)\n    \n    # Optional: If the list is empty, give the user feedback\n    if not names_list:\n        nuke.message(\"No tagged nodes found with knob 'c8aB5Azx3'\")\nelse:\n    nuke.message(\"Knob 'Name' not found on this node.\")\n\n# 4. Clear current selection and select the tagged nodes\nfor n in nuke.allNodes():\n    n.setSelected(False)\n\nfor name in names_list:\n    target = nuke.toNode(name)\n    if target:\n        target.setSelected(True)" +STARTLINE}
+addUserKnob {22 Connect l "<font color=\"lightblue\">Connect" -STARTLINE T "import nuke\nimport nukescripts\n\ndef link_and_color_node():\n    node = nuke.thisNode()\n    \n    try:\n        # Get the target node name from the 'Name' knob\n        target_name = node\['Name'].value()\n        target_node = nuke.toNode(target_name)\n\n        if target_node:\n            # Establish the connection\n            node.setInput(0, target_node)\n            \n            # Safely fetch the tile_color\n            # Using .value() is generally safer than toScript() for knob data\n            color = target_node\['tile_color'].value()\n            node\['tile_color'].setValue(int(color))\n        else:\n            nuke.message(f\"Node '\{target_name\}' not found in the script.\")\n\n    except NameError:\n        nuke.message(\"The 'Name' knob does not exist on this node.\")\n    except Exception as e:\n        nuke.message(f\"An unexpected error occurred: \{str(e)\}\")\n\n# Execute and clean up\nlink_and_color_node()\nnukescripts.clear_selection_recursive()\n\n\n"}
+addUserKnob {26 ""}
+addUserKnob {22 Find l "<font color=\"lightblue\">Find Connected" t "This will show you the node Doppelganger is connected to" -STARTLINE T "import nuke\nimport nukescripts\n\ndef focus_on_target_node():\n    node = nuke.thisNode()\n    \n    try:\n        # Get the target name from the 'Name' knob\n        target_name = node\['Name'].value()\n        target_node = nuke.toNode(target_name)\n\n        if target_node:\n            # Deselect everything else to highlight the target\n            nukescripts.clear_selection_recursive()\n            target_node.setSelected(True)\n            \n            # Center the screen on the target node\n            # xpos() and ypos() return the top-left corner of the node\n            x = target_node.xpos()\n            y = target_node.ypos()\n            \n            # Zoom levels: 1.0 is 100%, 2.0 is 50% (further away)\n            nuke.zoom(2.0, \[x, y])\n            \n        else:\n            nuke.message(f\"Search failed: Node '\{target_name\}' does not exist.\")\n\n    except NameError:\n        nuke.message(\"This node is missing the required 'Name' knob.\")\n    except Exception as e:\n        # Catch-all for unexpected UI errors\n        print(f\"Zoom Error: \{e\}\")\n\nfocus_on_target_node()"}
+addUserKnob {22 ConnectAll l "<font color=\"lightblue\">Connect all Doppelgangers" t "This will connect all Doppelgangers in your script. Handy if you have pasted a large script" -STARTLINE T "import nuke\n\ndef execute_noop_connect():\n    # Define targets outside the loop for efficiency\n    target_class = 'NoOp'\n    button_name = 'Connect'\n\n    for node in nuke.allNodes(recurseGroups=False):\n        # Direct string comparison is faster than 'in' for exact class matching\n        if node.Class() == target_class:\n            try:\n                # Attempt to trigger the button\n                knob = node.knob(button_name)\n                if isinstance(knob, nuke.PyScript_Knob):\n                    knob.execute()\n            except NameError:\n                # Knob doesn't exist on this specific NoOp\n                pass\n            except Exception as e:\n                # Log unexpected errors to the console without stopping the loop\n                print(f\"Error executing \{node.name()\}: \{e\}\")\n\nexecute_noop_connect()"}
+addUserKnob {26 ""}
+addUserKnob {26 DateUpdated l "" +STARTLINE T "<div style=\"text-align: left; font-size: 10px; color: #666666; font-style: italic;\">\n  v 1.1 : 2018\n</div>"}
+}
+NoOp {
+inputs 0
+name DoppelgangerBasic
+tile_color 0x9c0000ff
+label "\n\n<i>\[knob Name]\n\n"
+note_font "DejaVu Sans Bold Italic"
+note_font_color 0xc3ffffff
+selected true
+xpos 4666
+ypos 979
+hide_input true
+addUserKnob {20 TG l -}
+addUserKnob {26 txt l "" +STARTLINE T "<b><font size=\"40\"><font color=\"light blue\">DOPPELGANGER</font></b>"}
+addUserKnob {26 ""}
+addUserKnob {4 Name l > M {MATTE_fg3 MATTE_fg2 MATTE_fg1 PAINT MATTE_mg3 MATTE_mg2 MATTE_mg1 MATTE_bg3 MATTE_bg2 MATTE_bg1 PLATE UNDISTORT DISTORT DEPTH CAMERA BOKEH}}
+Name CAMERA
+addUserKnob {22 Refresh l "<font color=\"lightblue\">Refresh" t "Refresh the List of nodes to look for" T "import nuke\n\ndef get_tagged_node_names(tag='c8aB5Azx3'):\n    \"\"\"\n    Finds all nodes with a specific knob and returns their names \n    without disrupting the user's current selection.\n    \"\"\"\n    names = \[]\n    \n    # Iterate once through all nodes\n    for node in nuke.allNodes():\n        # .knob() returns None if not found, which is 'Falsy'\n        if node.knob(tag):\n            names.append(node.name())\n            \n    return names\n\n# Usage\ntagged_names = get_tagged_node_names()\n\n# Optional: If you actually NEED them selected in the DAG for the user\nfor name in tagged_names:\n    nuke.toNode(name).setSelected(True)\n\n\n\n\nnuke.thisNode()\['Name'].setValues(names)" +STARTLINE}
+addUserKnob {22 Connect l "<font color=\"lightblue\">Connect" -STARTLINE T "import nuke\nimport nukescripts\n\ndef link_and_color_node():\n    node = nuke.thisNode()\n    \n    try:\n        # Get the target node name from the 'Name' knob\n        target_name = node\['Name'].value()\n        target_node = nuke.toNode(target_name)\n\n        if target_node:\n            # Establish the connection\n            node.setInput(0, target_node)\n            \n            # Safely fetch the tile_color\n            # Using .value() is generally safer than toScript() for knob data\n            color = target_node\['tile_color'].value()\n            node\['tile_color'].setValue(int(color))\n        else:\n            nuke.message(f\"Node '\{target_name\}' not found in the script.\")\n\n    except NameError:\n        nuke.message(\"The 'Name' knob does not exist on this node.\")\n    except Exception as e:\n        nuke.message(f\"An unexpected error occurred: \{str(e)\}\")\n\n# Execute and clean up\nlink_and_color_node()\nnukescripts.clear_selection_recursive()\n\n\n"}
+addUserKnob {26 ""}
+addUserKnob {22 Find l "<font color=\"lightblue\">Find Connected" t "This will show you the node Doppelganger is connected to" -STARTLINE T "import nuke\nimport nukescripts\n\ndef focus_on_target_node():\n    node = nuke.thisNode()\n    \n    try:\n        # Get the target name from the 'Name' knob\n        target_name = node\['Name'].value()\n        target_node = nuke.toNode(target_name)\n\n        if target_node:\n            # Deselect everything else to highlight the target\n            nukescripts.clear_selection_recursive()\n            target_node.setSelected(True)\n            \n            # Center the screen on the target node\n            # xpos() and ypos() return the top-left corner of the node\n            x = target_node.xpos()\n            y = target_node.ypos()\n            \n            # Zoom levels: 1.0 is 100%, 2.0 is 50% (further away)\n            nuke.zoom(2.0, \[x, y])\n            \n        else:\n            nuke.message(f\"Search failed: Node '\{target_name\}' does not exist.\")\n\n    except NameError:\n        nuke.message(\"This node is missing the required 'Name' knob.\")\n    except Exception as e:\n        # Catch-all for unexpected UI errors\n        print(f\"Zoom Error: \{e\}\")\n\nfocus_on_target_node()"}
+addUserKnob {22 ConnectAll l "<font color=\"lightblue\">Connect all Doppelgangers" t "This will connect all Doppelgangers in your script. Handy if you have pasted a large script" -STARTLINE T "import nuke\n\ndef execute_noop_connect():\n    # Define targets outside the loop for efficiency\n    target_class = 'NoOp'\n    button_name = 'Connect'\n\n    for node in nuke.allNodes(recurseGroups=False):\n        # Direct string comparison is faster than 'in' for exact class matching\n        if node.Class() == target_class:\n            try:\n                # Attempt to trigger the button\n                knob = node.knob(button_name)\n                if isinstance(knob, nuke.PyScript_Knob):\n                    knob.execute()\n            except NameError:\n                # Knob doesn't exist on this specific NoOp\n                pass\n            except Exception as e:\n                # Log unexpected errors to the console without stopping the loop\n                print(f\"Error executing \{node.name()\}: \{e\}\")\n\nexecute_noop_connect()"}
+addUserKnob {26 ""}
+addUserKnob {26 DateUpdated l "" +STARTLINE T "<div style=\"text-align: left; font-size: 10px; color: #666666; font-style: italic;\">\n  v 1.1 : 2018\n</div>"}
 }
